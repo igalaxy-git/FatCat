@@ -5,5 +5,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Высшая проба" />
+    <orderEntry type="module" module-name="yandex.pygame" />
+    <orderEntry type="module" module-name="yandex.pygame" />
   </component>
 </module>

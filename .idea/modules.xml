@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Yandex_PyGame/.idea/yandex.pygame.iml" filepath="$PROJECT_DIR$/../Yandex_PyGame/.idea/yandex.pygame.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Высшая проба/.idea/Высшая проба.iml" filepath="$PROJECT_DIR$/../Высшая проба/.idea/Высшая проба.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Проект №2 - FatCat.iml" filepath="$PROJECT_DIR$/.idea/Проект №2 - FatCat.iml" />
     </modules>
