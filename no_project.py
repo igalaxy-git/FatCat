@@ -251,10 +251,11 @@ for row in data:
         if element == 'C' or element == 'c' or element == 'B' or element == 'b' or element == 'R' or element == 'r' \
                 or element == 'D' or element == 'T' or element == 'L' or element == 'l' or element == '#':
             short_path_code.DG.remove_node(str(number))
+        elif element == 'e':
+            WHERE_IS_ENEMY = number
+        elif element == '@':
+            WHERE_IS_CAT = number
         number += 1
-
-WHERE_IS_CAT = 128
-WHERE_IS_ENEMY = 68
 
 all_sprites.draw(screen)
 
