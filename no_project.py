@@ -9,6 +9,7 @@
 import pygame
 import os
 import sys
+import short_path_code
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "0, 0"  # Назначаются координаты позиции окна
 pygame.init()
@@ -19,7 +20,6 @@ clock = pygame.time.Clock()
 WIDTH, HEIGHT, FPS = 1280, 758, 5  # Задаются размеры для поля и количество кадров в секунду
 tile_height = tile_width = 100  # Задаются высота и ширина игровой клетки
 player = None
-
 
 punkts = [(570, 300, u'Играть', (11, 0, 77), pygame.Color('purple'), 0),  # Пункты предыгрового меню
           (570, 370, u'Выход', (11, 0, 77), pygame.Color('purple'), 1)]
@@ -229,7 +229,7 @@ player_image = load_image('cat/cat1.png'), load_image('cat/cat2.png'), \
                load_image('cat/cat3.png'), load_image('cat/cat4.png')
 
 enemy_image = load_image('old woman/look_right.png').convert_alpha(), load_image('old woman/look_left.png'), \
-               load_image('old woman/down.png'), load_image('old woman/up.png')
+              load_image('old woman/down.png'), load_image('old woman/up.png')
 
 fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 new_image = load_image('house/new.png')
@@ -241,6 +241,21 @@ enemy_group = pygame.sprite.Group()
 new_group = pygame.sprite.Group()
 camera = Camera()
 data = load_level('map.txt')
+
+#  узлы в графе пронумерованы, поэтому каждая клетка на поле имеет свой номер
+#  через этот номер будем отслеживать, где находится игрок и враг, а также остальные предметы
+
+number = 1
+for row in data:
+    for element in list(row):
+        if element == 'C' or element == 'c' or element == 'B' or element == 'b' or element == 'R' or element == 'r' \
+                or element == 'D' or element == 'T' or element == 'L' or element == 'l' or element == '#':
+            short_path_code.DG.remove_node(str(number))
+        number += 1
+
+WHERE_IS_CAT = 128
+WHERE_IS_ENEMY = 68
+
 all_sprites.draw(screen)
 
 for i in range(len(data)):
@@ -274,24 +289,28 @@ while running:
                 data[x - 1] = data[x - 1][:y] + '@' + data[x - 1][y + 1:]
                 x = x - 1
                 player.step_top()
+                WHERE_IS_CAT -= 15
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
             if x < len(data[0]) and data[x + 1][y] == '.':
                 data[x] = data[x][:y] + '.' + data[x][y + 1:]
                 data[x + 1] = data[x + 1][:y] + '@' + data[x + 1][y + 1:]
                 x = x + 1
                 player.step_down()
+                WHERE_IS_CAT += 15
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
             if y < len(data[0]) - 1 and data[x][y + 1] == '.':
                 data[x] = data[x][:y] + '.' + data[x][y + 1:]
                 data[x] = data[x][:y + 1] + '@' + data[x][y + 2:]
                 y = y + 1
                 player.step_right()
+                WHERE_IS_CAT += 1
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             if y > 0 and data[x][y - 1] == '.':
                 data[x] = data[x][:y] + '.' + data[x][y + 1:]
                 data[x] = data[x][:y - 1] + '@' + data[x][y:]
                 y = y - 1
                 player.step_left()
+                WHERE_IS_CAT -= 1
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  # взаимодествие с объектами на ENTER
             tiles_group.update()
             if CHAIR > 0:  # поверка есть ли целое кресло
@@ -358,6 +377,34 @@ while running:
 
     if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
         show_menu = True
+
+    path = short_path_code.nx.shortest_path(short_path_code.DG, str(WHERE_IS_ENEMY), str(WHERE_IS_CAT))
+    if int(path[0]) == int(WHERE_IS_ENEMY) - 1:
+        data[x] = data[x][:y] + '.' + data[x][y + 1:]
+        data[x] = data[x][:y + 1] + 'e' + data[x][y + 2:]
+        y = y + 1
+        enemy.step_right()
+        WHERE_IS_ENEMY += 1
+    elif int(path[0]) == int(WHERE_IS_ENEMY) + 1:
+        data[x] = data[x][:y] + '.' + data[x][y + 1:]
+        data[x] = data[x][:y - 1] + 'e' + data[x][y:]
+        y = y - 1
+        enemy.step_left()
+        WHERE_IS_ENEMY -= 1
+    elif int(path[0]) == int(WHERE_IS_ENEMY) - 15:
+        data[x] = data[x][:y] + '.' + data[x][y + 1:]
+        data[x + 1] = data[x + 1][:y] + 'e' + data[x + 1][y + 1:]
+        x = x + 1
+        enemy.step_down()
+        WHERE_IS_ENEMY += 15
+    elif int(path[0]) == int(WHERE_IS_ENEMY) + 15:
+        data[x] = data[x][:y] + '.' + data[x][y + 1:]
+        data[x - 1] = data[x - 1][:y] + 'e' + data[x - 1][y + 1:]
+        x = x - 1
+        enemy.step_top()
+        WHERE_IS_ENEMY -= 15
+
+
     all_sprites.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
