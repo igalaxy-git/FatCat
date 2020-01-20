@@ -234,6 +234,8 @@ enemy_image = load_image('old woman/look_right.png').convert_alpha(), load_image
 fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 new_image = load_image('house/new.png')
 
+pygame.mixer.music.load('data/music/coupe.mp3')
+
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -257,8 +259,10 @@ BED = 1
 
 while running:
     if show_menu:
+        pygame.mixer.music.stop()
         game.menu()
         show_menu = False
+    pygame.mixer.music.play(loops=-1)
     screen.fill((0, 0, 0))
     camera.update(player)
     for sprite in all_sprites:
@@ -358,6 +362,7 @@ while running:
 
     if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
         show_menu = True
+
     all_sprites.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
