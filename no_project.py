@@ -106,7 +106,7 @@ class Menu:  # класс предыгрового меню
 
     def menu(self):
         done = True
-        font_menu = pygame.font.Font(None, 75)
+        font_menu = pygame.font.Font('data/fonts/3572.ttf', 75)
         pygame.key.set_repeat(0, 0)
         pygame.mouse.set_visible(True)
         punkt = 0
