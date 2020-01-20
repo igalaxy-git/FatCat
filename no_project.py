@@ -46,10 +46,6 @@ class Player(pygame.sprite.Sprite):  # класс игрока
         self.image = player_image[0]
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 15)
 
-    def set_pos(self, x, y):
-        self.rect.x = y
-        self.rect.y = x
-
     def step_top(self):
         self.rect.y -= tile_height
         self.image = player_image[3]
@@ -64,6 +60,29 @@ class Player(pygame.sprite.Sprite):  # класс игрока
 
     def step_right(self):
         self.image = player_image[0]
+        self.rect.x += tile_width
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(enemy_group, all_sprites)
+        self.image = pygame.transform.scale(enemy_image[0], (73, 100))
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 15)
+
+    def step_top_enemy(self):
+        self.rect.y -= tile_height
+        self.image = pygame.transform.scale(enemy_image[3], (73, 100))
+
+    def step_down_enemy(self):
+        self.rect.y += tile_height
+        self.image = pygame.transform.scale(enemy_image[2], (80, 100))
+
+    def step_left_enemy(self):
+        self.image = pygame.transform.scale(enemy_image[1], (73, 100))
+        self.rect.x -= tile_width
+
+    def step_right_enemy(self):
+        self.image = pygame.transform.scale(enemy_image[0], (73, 100))
         self.rect.x += tile_width
 
 
@@ -157,7 +176,7 @@ def load_level(filename):
 
 
 def generate_level(level):
-    new_player, x, y, new = None, None, None, None
+    new_player, x, y, new, new_enemy = None, None, None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
@@ -192,7 +211,10 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('floor', x, y)
                 new_player = Player(x, y)
-    return new_player, x, y, new
+            elif level[y][x] == 'e':
+                Tile('floor', x, y)
+                new_enemy = Enemy(x, y)
+    return new_player, x, y, new, new_enemy
 
 
 tile_images = {'wall': load_image('house/black.png'), 'floor': load_image('house/floor.png'),
@@ -205,12 +227,17 @@ tile_images = {'wall': load_image('house/black.png'), 'floor': load_image('house
                'wall_lowerright': load_image('house/wall_lowerright.png')}
 player_image = load_image('cat/cat1.png'), load_image('cat/cat2.png'), \
                load_image('cat/cat3.png'), load_image('cat/cat4.png')
+
+enemy_image = load_image('old woman/look_right.png').convert_alpha(), load_image('old woman/look_left.png'), \
+               load_image('old woman/down.png'), load_image('old woman/up.png')
+
 fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 new_image = load_image('house/new.png')
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
 new_group = pygame.sprite.Group()
 camera = Camera()
 data = load_level('map.txt')
@@ -220,7 +247,7 @@ for i in range(len(data)):
     if '@' in data[i]:
         x = i
 y = data[x].index('@')
-player, level_x, level_y, NPC = generate_level(data)
+player, level_x, level_y, NPC, enemy = generate_level(data)
 running = True
 show_menu = True
 game = Menu(punkts)
@@ -296,7 +323,7 @@ while running:
                             obj.change_image('destroyed_chair')
                     CHAIR -= 1
                     DESTROYED_OBJECTS += 1
-            if BED > 0:
+            if BED > 0:  # проверка есть ли целая кровать
                 if data[x + 1][y] == 'B':  # проверка есть ли снизу кровать
                     data[x + 1] = data[x + 1][:y] + 'b' + data[x + 1][y + 1:]
                     for obj in tiles_group:
@@ -325,6 +352,10 @@ while running:
                             obj.change_image('destroyed_bed')
                     BED -= 1
                     DESTROYED_OBJECTS += 1
+    # проверка есть ли рядом enemy
+    if data[x + 1][y] == 'e' or data[x - 1][y] == 'e' or data[x][y + 1] == 'e' or data[x][y - 1] == 'e':
+        show_menu = True
+
     if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
         show_menu = True
     all_sprites.draw(screen)

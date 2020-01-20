@@ -14,7 +14,7 @@ y_start, x_start = [int(i) for i in input().split()]
 y_search, x_search = [int(i) for i in input().split()]
 
 
-def searсh_path(data, x, y, short_path={}, full_path={}, count=0):
+def search_path(data, x, y, short_path={}, full_path={}, count=0):
     full_path[(x, y)] = count
     if x == x_search and y == y_search:
         return full_path, short_path
@@ -29,13 +29,13 @@ def searсh_path(data, x, y, short_path={}, full_path={}, count=0):
                     (x + walk_X, y + walk_Y)] = count  # Перезаписываем full_path, т.к нашли более короткую дистанцию
                 short_path[(x + walk_X, y + walk_Y)] = (x, y)  # Пепрезаписываем short_path, потому что нашли точку, из
                 # которой в данную можно попасть короче
-                searсh_path(data, x + walk_X, y + walk_Y, short_path, full_path,
+                search_path(data, x + walk_X, y + walk_Y, short_path, full_path,
                             count + 1)  # Увеличиваем шаг и запускаем
                 # рекурсивно функцию
             else:
                 if (x + walk_X, y + walk_Y) not in full_path.keys():  # Если в точке, куда собираемся пойти еще не были
                     short_path[(x + walk_X, y + walk_Y)] = (x, y)  # записываем {куда идём:откуда идём}
-                    searсh_path(data, x + walk_X, y + walk_Y, short_path, full_path, count + 1)  # запускаем рекурсию
+                    search_path(data, x + walk_X, y + walk_Y, short_path, full_path, count + 1)  # запускаем рекурсию
                     # с шагом +1
     return full_path, short_path
 
@@ -50,14 +50,14 @@ def short_path(data, path=[], start=(x_start, y_start), end=(x_search, y_search)
     if len(path) == 0:
         path.append(end)
     path.append(data[end])
-    if data[end]==start:
+    if data[end] == start:
         return path
     else:
         short_path(data, path, start, data[end])
     return path
 
 
-p = searсh_path(labyrint, x_start, y_start)
+p = search_path(labyrint, x_start, y_start)
 print(p)
 print(p[1])
 print(short_path(p[1]))
