@@ -16,7 +16,7 @@ window = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # pygame.NOFRAME не�
 screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
 clock = pygame.time.Clock()
 
-WIDTH, HEIGHT, FPS = 1280, 758, 50  # Задаются размеры для поля и количество кадров в секунду
+WIDTH, HEIGHT, FPS = 1280, 758, 5  # Задаются размеры для поля и количество кадров в секунду
 tile_height = tile_width = 100  # Задаются высота и ширина игровой клетки
 player = None
 
@@ -213,8 +213,6 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 new_group = pygame.sprite.Group()
 camera = Camera()
-game = Menu(punkts)
-game.menu()
 data = load_level('map.txt')
 all_sprites.draw(screen)
 
@@ -224,7 +222,16 @@ for i in range(len(data)):
 y = data[x].index('@')
 player, level_x, level_y, NPC = generate_level(data)
 running = True
+show_menu = True
+game = Menu(punkts)
+DESTROYED_OBJECTS = 0
+CHAIR = 2
+BED = 1
+
 while running:
+    if show_menu:
+        game.menu()
+        show_menu = False
     screen.fill((0, 0, 0))
     camera.update(player)
     for sprite in all_sprites:
@@ -260,47 +267,66 @@ while running:
                 player.step_left()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  # взаимодествие с объектами на ENTER
             tiles_group.update()
-            if data[x + 1][y] == 'C':  # проверка есть ли снизу кресло
-                data[x + 1] = data[x + 1][:y] + 'c' + data[x + 1][y + 1:]
-                for obj in tiles_group:
-                    if obj.pos_x == y and obj.pos_y == x + 1:
-                        obj.change_image('destroyed_chair')
-            elif data[x - 1][y] == 'C':  # проверка есть ли сверху кресло
-                data[x - 1] = data[x - 1][:y] + 'c' + data[x - 1][y + 1:]
-                for obj in tiles_group:
-                    if obj.pos_x == y and obj.pos_y == x - 1:
-                        obj.change_image('destroyed_chair')
-            elif data[x][y + 1] == 'C':  # проверка есть ли справа кресло
-                data[x] = data[x][:y + 1] + 'c' + data[x][y + 2:]
-                for obj in tiles_group:
-                    if obj.pos_x == y + 1 and obj.pos_y == x:
-                        obj.change_image('destroyed_chair')
-            elif data[x][y - 1] == 'B':  # проверка есть ли слева кровать
-                data[x] = data[x][:y - 1] + 'b' + data[x][y:]
-                for obj in tiles_group:
-                    if obj.pos_x == y - 1 and obj.pos_y == x:
-                        obj.change_image('destroyed_bed')
-            elif data[x + 1][y] == 'B':  # проверка есть ли снизу кровать
-                data[x + 1] = data[x + 1][:y] + 'b' + data[x + 1][y + 1:]
-                for obj in tiles_group:
-                    if obj.pos_x == y and obj.pos_y == x + 1:
-                        obj.change_image('destroyed_bed')
-            elif data[x - 1][y] == 'B':  # проверка есть ли сверху кровать
-                data[x - 1] = data[x - 1][:y] + 'b' + data[x - 1][y + 1:]
-                for obj in tiles_group:
-                    if obj.pos_x == y and obj.pos_y == x - 1:
-                        obj.change_image('destroyed_bed')
-            elif data[x][y + 1] == 'B':  # проверка есть ли справа кровать
-                data[x] = data[x][:y + 1] + 'b' + data[x][y + 2:]
-                for obj in tiles_group:
-                    if obj.pos_x == y + 1 and obj.pos_y == x:
-                        obj.change_image('destroyed_bed')
-            elif data[x][y - 1] == 'B':  # проверка есть ли слева кровать
-                data[x] = data[x][:y - 1] + 'b' + data[x][y:]
-                for obj in tiles_group:
-                    if obj.pos_x == y - 1 and obj.pos_y == x:
-                        obj.change_image('destroyed_bed')
-
+            if CHAIR > 0:  # поверка есть ли целое кресло
+                if data[x + 1][y] == 'C':  # проверка есть ли снизу кресло
+                    data[x + 1] = data[x + 1][:y] + 'c' + data[x + 1][y + 1:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y and obj.pos_y == x + 1:
+                            obj.change_image('destroyed_chair')
+                    CHAIR -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x - 1][y] == 'C':  # проверка есть ли сверху кресло
+                    data[x - 1] = data[x - 1][:y] + 'c' + data[x - 1][y + 1:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y and obj.pos_y == x - 1:
+                            obj.change_image('destroyed_chair')
+                    CHAIR -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x][y + 1] == 'C':  # проверка есть ли справа кресло
+                    data[x] = data[x][:y + 1] + 'c' + data[x][y + 2:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y + 1 and obj.pos_y == x:
+                            obj.change_image('destroyed_chair')
+                    CHAIR -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x][y - 1] == 'C':  # проверка есть ли слева кресло
+                    data[x] = data[x][:y - 1] + 'b' + data[x][y:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y - 1 and obj.pos_y == x:
+                            obj.change_image('destroyed_chair')
+                    CHAIR -= 1
+                    DESTROYED_OBJECTS += 1
+            if BED > 0:
+                if data[x + 1][y] == 'B':  # проверка есть ли снизу кровать
+                    data[x + 1] = data[x + 1][:y] + 'b' + data[x + 1][y + 1:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y and obj.pos_y == x + 1:
+                            obj.change_image('destroyed_bed')
+                    BED -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x - 1][y] == 'B':  # проверка есть ли сверху кровать
+                    data[x - 1] = data[x - 1][:y] + 'b' + data[x - 1][y + 1:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y and obj.pos_y == x - 1:
+                            obj.change_image('destroyed_bed')
+                    BED -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x][y + 1] == 'B':  # проверка есть ли справа кровать
+                    data[x] = data[x][:y + 1] + 'b' + data[x][y + 2:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y + 1 and obj.pos_y == x:
+                            obj.change_image('destroyed_bed')
+                    BED -= 1
+                    DESTROYED_OBJECTS += 1
+                elif data[x][y - 1] == 'B':  # проверка есть ли слева кровать
+                    data[x] = data[x][:y - 1] + 'b' + data[x][y:]
+                    for obj in tiles_group:
+                        if obj.pos_x == y - 1 and obj.pos_y == x:
+                            obj.change_image('destroyed_bed')
+                    BED -= 1
+                    DESTROYED_OBJECTS += 1
+    if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
+        show_menu = True
     all_sprites.draw(screen)
     player_group.draw(screen)
     pygame.display.flip()
