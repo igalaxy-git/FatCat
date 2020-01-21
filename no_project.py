@@ -419,6 +419,66 @@ def main():
                                 obj.change_image('destroyed_bed')
                         BED -= 1
                         DESTROYED_OBJECTS += 1
+                    elif data[x + 1][y] == 'S':  # проверка есть ли снизу шкаф
+                        data[x + 1] = data[x + 1][:y] + 's' + data[x + 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x + 1:
+                                obj.change_image('destroyed_cupboard')
+                    elif data[x - 1][y] == 'S':  # проверка есть ли сверху шкаф
+                        data[x - 1] = data[x - 1][:y] + 's' + data[x - 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x - 1:
+                                obj.change_image('destroyed_cupboard')
+                    elif data[x][y + 1] == 'S':  # проверка есть ли справа шкаф
+                        data[x] = data[x][:y + 1] + 's' + data[x][y + 2:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y + 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_cupboard')
+                    elif data[x][y - 1] == 'S':  # проверка есть ли слева шкаф
+                        data[x] = data[x][:y - 1] + 's' + data[x][y:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y - 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_cupboard')
+                    elif data[x + 1][y] == 'P':  # проверка есть ли снизу коробка
+                        data[x + 1] = data[x + 1][:y] + 'p' + data[x + 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x + 1:
+                                obj.change_image('destroyed_postbox')
+                    elif data[x - 1][y] == 'P':  # проверка есть ли сверху коробка
+                        data[x - 1] = data[x - 1][:y] + 'p' + data[x - 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x - 1:
+                                obj.change_image('destroyed_postbox')
+                    elif data[x][y + 1] == 'P':  # проверка есть ли справа коробка
+                        data[x] = data[x][:y + 1] + 'p' + data[x][y + 2:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y + 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_postbox')
+                    elif data[x][y - 1] == 'P':  # проверка есть ли слева коробка
+                        data[x] = data[x][:y - 1] + 'p' + data[x][y:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y - 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_postbox')
+                    elif data[x + 1][y] == 'N':  # проверка есть ли снизу тумба
+                        data[x + 1] = data[x + 1][:y] + 'n' + data[x + 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x + 1:
+                                obj.change_image('destroyed_nightstand')
+                    elif data[x - 1][y] == 'N':  # проверка есть ли сверху тумба
+                        data[x - 1] = data[x - 1][:y] + 'n' + data[x - 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x - 1:
+                                obj.change_image('destroyed_nightstand')
+                    elif data[x][y + 1] == 'N':  # проверка есть ли справа тумба
+                        data[x] = data[x][:y + 1] + 'n' + data[x][y + 2:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y + 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_nightstand')
+                    elif data[x][y - 1] == 'N':  # проверка есть ли слева тумба
+                        data[x] = data[x][:y - 1] + 'n' + data[x][y:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y - 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_nightstand')
         # проверка есть ли рядом enemy
         if data[x + 1][y] == 'e' or data[x - 1][y] == 'e' or data[x][y + 1] == 'e' or data[x][y - 1] == 'e':
             show_menu = True
