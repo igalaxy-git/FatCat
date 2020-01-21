@@ -58,10 +58,16 @@ class EditTable(QWidget):
         inf = (args[-2], args[-1])
         self.cur.execute("INSERT INTO Winners VALUES (?, ?)", inf)
         self.con.commit()
-        result = self.cur.execute("SELECT * FROM Winners").fetchall()
+        result = self.cur.execute("SELECT * FROM Winners ORDER BY Time").fetchall()
         for i in range(len(result)):
             self.tableWidget.setItem(i, 0, QTableWidgetItem(str(result[i][0])))
             self.tableWidget.setItem(i, 1, QTableWidgetItem(str(result[i][1])))
+
+        self.pushButton_2.clicked.connect(self.run)
+
+    def run(self):
+        main()
+        self.close()
 
 
 class Tile(pygame.sprite.Sprite):  # класс работы с текстурами
@@ -274,143 +280,149 @@ fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 new_image = load_image('house/new.png')
 
 pygame.mixer.music.load('data/music/coupe.mp3')
-
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 new_group = pygame.sprite.Group()
-camera = Camera()
-data = load_level('map.txt')
-all_sprites.draw(screen)
 
-for i in range(len(data)):
-    if '@' in data[i]:
-        x = i
-y = data[x].index('@')
-player, level_x, level_y, NPC, enemy = generate_level(data)
-running = True
-show_menu = True
-game = Menu(punkts)
-DESTROYED_OBJECTS = 0
-CHAIR = 2
-BED = 1
+winner_time = 0
 
-while running:
-    if show_menu:
-        pygame.mixer.music.stop()
-        game.menu()
-        show_menu = False
-    pygame.mixer.music.play(loops=-1)
-    screen.fill((0, 0, 0))
-    camera.update(player)
-    for sprite in all_sprites:
-        camera.apply(sprite)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:  # выход на ESC в предыгровое меню
-            game.menu()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:  # движение кота
-            if x > 0 and data[x - 1][y] == '.':
-                data[x] = data[x][:y] + '.' + data[x][y + 1:]
-                data[x - 1] = data[x - 1][:y] + '@' + data[x - 1][y + 1:]
-                x = x - 1
-                player.step_top()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            if x < len(data[0]) and data[x + 1][y] == '.':
-                data[x] = data[x][:y] + '.' + data[x][y + 1:]
-                data[x + 1] = data[x + 1][:y] + '@' + data[x + 1][y + 1:]
-                x = x + 1
-                player.step_down()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            if y < len(data[0]) - 1 and data[x][y + 1] == '.':
-                data[x] = data[x][:y] + '.' + data[x][y + 1:]
-                data[x] = data[x][:y + 1] + '@' + data[x][y + 2:]
-                y = y + 1
-                player.step_right()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            if y > 0 and data[x][y - 1] == '.':
-                data[x] = data[x][:y] + '.' + data[x][y + 1:]
-                data[x] = data[x][:y - 1] + '@' + data[x][y:]
-                y = y - 1
-                player.step_left()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  # взаимодествие с объектами на ENTER
-            tiles_group.update()
-            if CHAIR > 0:  # поверка есть ли целое кресло
-                if data[x + 1][y] == 'C':  # проверка есть ли снизу кресло
-                    data[x + 1] = data[x + 1][:y] + 'c' + data[x + 1][y + 1:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y and obj.pos_y == x + 1:
-                            obj.change_image('destroyed_chair')
-                    CHAIR -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x - 1][y] == 'C':  # проверка есть ли сверху кресло
-                    data[x - 1] = data[x - 1][:y] + 'c' + data[x - 1][y + 1:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y and obj.pos_y == x - 1:
-                            obj.change_image('destroyed_chair')
-                    CHAIR -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x][y + 1] == 'C':  # проверка есть ли справа кресло
-                    data[x] = data[x][:y + 1] + 'c' + data[x][y + 2:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y + 1 and obj.pos_y == x:
-                            obj.change_image('destroyed_chair')
-                    CHAIR -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x][y - 1] == 'C':  # проверка есть ли слева кресло
-                    data[x] = data[x][:y - 1] + 'b' + data[x][y:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y - 1 and obj.pos_y == x:
-                            obj.change_image('destroyed_chair')
-                    CHAIR -= 1
-                    DESTROYED_OBJECTS += 1
-            if BED > 0:  # проверка есть ли целая кровать
-                if data[x + 1][y] == 'B':  # проверка есть ли снизу кровать
-                    data[x + 1] = data[x + 1][:y] + 'b' + data[x + 1][y + 1:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y and obj.pos_y == x + 1:
-                            obj.change_image('destroyed_bed')
-                    BED -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x - 1][y] == 'B':  # проверка есть ли сверху кровать
-                    data[x - 1] = data[x - 1][:y] + 'b' + data[x - 1][y + 1:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y and obj.pos_y == x - 1:
-                            obj.change_image('destroyed_bed')
-                    BED -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x][y + 1] == 'B':  # проверка есть ли справа кровать
-                    data[x] = data[x][:y + 1] + 'b' + data[x][y + 2:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y + 1 and obj.pos_y == x:
-                            obj.change_image('destroyed_bed')
-                    BED -= 1
-                    DESTROYED_OBJECTS += 1
-                elif data[x][y - 1] == 'B':  # проверка есть ли слева кровать
-                    data[x] = data[x][:y - 1] + 'b' + data[x][y:]
-                    for obj in tiles_group:
-                        if obj.pos_x == y - 1 and obj.pos_y == x:
-                            obj.change_image('destroyed_bed')
-                    BED -= 1
-                    DESTROYED_OBJECTS += 1
-    # проверка есть ли рядом enemy
-    if data[x + 1][y] == 'e' or data[x - 1][y] == 'e' or data[x][y + 1] == 'e' or data[x][y - 1] == 'e':
-        show_menu = True
-        data = load_level('map.txt')
-        DESTROYED_OBJECTS = 0
-        CHAIR = 2
-        BED = 1
 
-    if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
-        winner_time = pygame.time.get_ticks() // 1000
-        app = QApplication(sys.argv)
-        ex = MainWindow()
-        ex.show()
-        sys.exit(app.exec())
-
+def main():
+    camera = Camera()
+    data = load_level('map.txt')
     all_sprites.draw(screen)
-    player_group.draw(screen)
-    pygame.display.flip()
-    clock.tick(FPS)
+
+    for i in range(len(data)):
+        if '@' in data[i]:
+            x = i
+    y = data[x].index('@')
+    player, level_x, level_y, NPC, enemy = generate_level(data)
+    running = True
+    show_menu = True
+    game = Menu(punkts)
+    DESTROYED_OBJECTS = 0
+    CHAIR = 2
+    BED = 1
+
+    while running:
+        if show_menu:
+            pygame.mixer.music.stop()
+            game.menu()
+            show_menu = False
+        pygame.mixer.music.play(loops=-1)
+        screen.fill((0, 0, 0))
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:  # выход на ESC в предыгровое меню
+                game.menu()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:  # движение кота
+                if x > 0 and data[x - 1][y] == '.':
+                    data[x] = data[x][:y] + '.' + data[x][y + 1:]
+                    data[x - 1] = data[x - 1][:y] + '@' + data[x - 1][y + 1:]
+                    x = x - 1
+                    player.step_top()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                if x < len(data[0]) and data[x + 1][y] == '.':
+                    data[x] = data[x][:y] + '.' + data[x][y + 1:]
+                    data[x + 1] = data[x + 1][:y] + '@' + data[x + 1][y + 1:]
+                    x = x + 1
+                    player.step_down()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                if y < len(data[0]) - 1 and data[x][y + 1] == '.':
+                    data[x] = data[x][:y] + '.' + data[x][y + 1:]
+                    data[x] = data[x][:y + 1] + '@' + data[x][y + 2:]
+                    y = y + 1
+                    player.step_right()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                if y > 0 and data[x][y - 1] == '.':
+                    data[x] = data[x][:y] + '.' + data[x][y + 1:]
+                    data[x] = data[x][:y - 1] + '@' + data[x][y:]
+                    y = y - 1
+                    player.step_left()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  # взаимодествие с объектами на ENTER
+                tiles_group.update()
+                if CHAIR > 0:  # поверка есть ли целое кресло
+                    if data[x + 1][y] == 'C':  # проверка есть ли снизу кресло
+                        data[x + 1] = data[x + 1][:y] + 'c' + data[x + 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x + 1:
+                                obj.change_image('destroyed_chair')
+                        CHAIR -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x - 1][y] == 'C':  # проверка есть ли сверху кресло
+                        data[x - 1] = data[x - 1][:y] + 'c' + data[x - 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x - 1:
+                                obj.change_image('destroyed_chair')
+                        CHAIR -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x][y + 1] == 'C':  # проверка есть ли справа кресло
+                        data[x] = data[x][:y + 1] + 'c' + data[x][y + 2:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y + 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_chair')
+                        CHAIR -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x][y - 1] == 'C':  # проверка есть ли слева кресло
+                        data[x] = data[x][:y - 1] + 'b' + data[x][y:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y - 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_chair')
+                        CHAIR -= 1
+                        DESTROYED_OBJECTS += 1
+                if BED > 0:  # проверка есть ли целая кровать
+                    if data[x + 1][y] == 'B':  # проверка есть ли снизу кровать
+                        data[x + 1] = data[x + 1][:y] + 'b' + data[x + 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x + 1:
+                                obj.change_image('destroyed_bed')
+                        BED -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x - 1][y] == 'B':  # проверка есть ли сверху кровать
+                        data[x - 1] = data[x - 1][:y] + 'b' + data[x - 1][y + 1:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y and obj.pos_y == x - 1:
+                                obj.change_image('destroyed_bed')
+                        BED -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x][y + 1] == 'B':  # проверка есть ли справа кровать
+                        data[x] = data[x][:y + 1] + 'b' + data[x][y + 2:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y + 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_bed')
+                        BED -= 1
+                        DESTROYED_OBJECTS += 1
+                    elif data[x][y - 1] == 'B':  # проверка есть ли слева кровать
+                        data[x] = data[x][:y - 1] + 'b' + data[x][y:]
+                        for obj in tiles_group:
+                            if obj.pos_x == y - 1 and obj.pos_y == x:
+                                obj.change_image('destroyed_bed')
+                        BED -= 1
+                        DESTROYED_OBJECTS += 1
+        # проверка есть ли рядом enemy
+        if data[x + 1][y] == 'e' or data[x - 1][y] == 'e' or data[x][y + 1] == 'e' or data[x][y - 1] == 'e':
+            show_menu = True
+            data = load_level('map.txt')
+            main()
+
+        if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
+            global winner_time
+            winner_time = pygame.time.get_ticks() // 1000
+            app = QApplication(sys.argv)
+            ex = MainWindow()
+            ex.show()
+            sys.exit(app.exec())
+
+        all_sprites.draw(screen)
+        player_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+main()
