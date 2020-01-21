@@ -256,10 +256,27 @@ def generate_level(level):
             elif level[y][x] == 'e':
                 Tile('floor', x, y)
                 new_enemy = Enemy(x, y)
+            elif level[y][x] == 'S':
+                Tile('cupboard', x, y)
+            elif level[y][x] == 's':
+                Tile('destroyed_cupboard', x, y)
+            elif level[y][x] == 'P':
+                Tile('postbox', x, y)
+            elif level[y][x] == 'p':
+                Tile('destroyed_postbox', x, y)
+            elif level[y][x] == 'N':
+                Tile('nightstand', x, y)
+            elif level[y][x] == 'n':
+                Tile('destroyed_nightstand', x, y)
     return new_player, x, y, new, new_enemy
 
 
-tile_images = {'wall': load_image('house/black.png'), 'floor': load_image('house/floor.png'),
+tile_images = {'cupboard': load_image('house/cupboard.png'), 'postbox': load_image('house/postbox.png'),
+               'destroyed_cupboard': load_image('house/destroyed_cupboard.png'),
+               'destroyed_postbox': load_image('house/destroyed_postbox.png'),
+               'destroyed_nightstand': load_image('house/destroyed_nightstand.png'),
+               'nightstand': load_image('house/nightstand.png'), 'wall': load_image('house/black.png'),
+               'floor': load_image('house/floor.png'),
                'way': load_image('house/test.png'), 'chair': load_image('house/chair.png'),
                'destroyed_chair': load_image('house/destroyed_chair.png'), 'bed': load_image('house/bed.png'),
                'destroyed_bed': load_image('house/destroyed_bed.png'),
