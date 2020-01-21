@@ -9,12 +9,9 @@
 import pygame
 import os
 import sys
-import sys
 from PyQt5 import uic
 import sqlite3
-from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMainWindow, QAction, qApp, \
-    QVBoxLayout, QScrollArea, QHBoxLayout, QFileDialog, QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QTableWidgetItem
 from PyQt5.QtGui import QIcon
 from name import Ui_MainWindow
 
