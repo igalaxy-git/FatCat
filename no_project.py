@@ -9,6 +9,14 @@
 import pygame
 import os
 import sys
+import sys
+from PyQt5 import uic
+import sqlite3
+from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMainWindow, QAction, qApp, \
+    QVBoxLayout, QScrollArea, QHBoxLayout, QFileDialog, QMessageBox, QTableWidgetItem
+from PyQt5.QtGui import QIcon
+from name import Ui_MainWindow
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "0, 0"  # Назначаются координаты позиции окна
 pygame.init()
@@ -23,6 +31,37 @@ player = None
 
 punkts = [(570, 300, u'Играть', (11, 0, 77), pygame.Color('purple'), 0),  # Пункты предыгрового меню
           (570, 370, u'Выход', (11, 0, 77), pygame.Color('purple'), 1)]
+
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.run)
+
+    def run(self):
+        winner_name = self.lineEdit.text()
+        self.edit_form = EditTable(self, winner_name, int(winner_time))
+        self.edit_form.show()
+        self.close()
+
+
+class EditTable(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        uic.loadUi('table.ui', self)
+        self.setWindowIcon(QIcon("data/resources/cat1.png"))
+        self.setWindowTitle('Table of Winners')
+        self.con = sqlite3.connect("winners.db")
+        self.cur = self.con.cursor()
+
+        inf = (args[-2], args[-1])
+        self.cur.execute("INSERT INTO Winners VALUES (?, ?)", inf)
+        self.con.commit()
+        result = self.cur.execute("SELECT * FROM Winners").fetchall()
+        for i in range(len(result)):
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(str(result[i][0])))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(result[i][1])))
 
 
 class Tile(pygame.sprite.Sprite):  # класс работы с текстурами
@@ -359,9 +398,17 @@ while running:
     # проверка есть ли рядом enemy
     if data[x + 1][y] == 'e' or data[x - 1][y] == 'e' or data[x][y + 1] == 'e' or data[x][y - 1] == 'e':
         show_menu = True
+        data = load_level('map.txt')
+        DESTROYED_OBJECTS = 0
+        CHAIR = 2
+        BED = 1
 
     if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
-        show_menu = True
+        winner_time = pygame.time.get_ticks() // 1000
+        app = QApplication(sys.argv)
+        ex = MainWindow()
+        ex.show()
+        sys.exit(app.exec())
 
     all_sprites.draw(screen)
     player_group.draw(screen)
