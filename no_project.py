@@ -25,11 +25,11 @@ WIDTH, HEIGHT, FPS = 1920, 1080, 5  # Задаются размеры для п�
 tile_height = tile_width = 100  # Задаются высота и ширина игровой клетки
 player = None
 
-
 punkts = [(570, 300, u'Играть', (11, 0, 77), pygame.Color('purple'), 0),  # Пункты предыгрового меню
           (570, 370, u'Выход', (11, 0, 77), pygame.Color('purple'), 1)]
 
 
+#  два класса для вывода рейтинга
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -288,7 +288,7 @@ player_image = load_image('cat/cat1.png'), load_image('cat/cat2.png'), \
                load_image('cat/cat3.png'), load_image('cat/cat4.png')
 
 enemy_image = load_image('old woman/look_right.png').convert_alpha(), load_image('old woman/look_left.png'), \
-               load_image('old woman/down.png'), load_image('old woman/up.png')
+              load_image('old woman/down.png'), load_image('old woman/up.png')
 
 fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
 new_image = load_image('house/new.png')
@@ -303,7 +303,7 @@ new_group = pygame.sprite.Group()
 winner_time = 0
 
 
-def main():
+def main():  # функия для вызова самой игры
     camera = Camera()
     data = load_level('map.txt')
     all_sprites.draw(screen)
@@ -317,8 +317,8 @@ def main():
     show_menu = True
     game = Menu(punkts)
     DESTROYED_OBJECTS = 0
-    CHAIR = 2
-    BED = 1
+    CHAIR = 4
+    BED = 2
 
     while running:
         if show_menu:
@@ -485,7 +485,7 @@ def main():
             data = load_level('map.txt')
             main()
 
-        if DESTROYED_OBJECTS == 3:  # проверяем уничтожил ли кот все объекты
+        if DESTROYED_OBJECTS == 6:  # проверяем уничтожил ли кот все объекты
             global winner_time
             winner_time = pygame.time.get_ticks() // 1000
             app = QApplication(sys.argv)
