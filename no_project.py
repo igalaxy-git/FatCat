@@ -21,7 +21,7 @@ window = pygame.display.set_mode((0, 0), pygame.NOFRAME)  # pygame.NOFRAME не�
 screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
 clock = pygame.time.Clock()
 
-WIDTH, HEIGHT, FPS = 1280, 758, 5  # Задаются размеры для поля и количество кадров в секунду
+WIDTH, HEIGHT, FPS = 1920, 1080, 5  # Задаются размеры для поля и количество кадров в секунду
 tile_height = tile_width = 100  # Задаются высота и ширина игровой клетки
 player = None
 
